@@ -31,7 +31,13 @@ function Get-OneDriveRoots {
 function Get-GoogleDriveRoots {
     $roots = @()
     # Drive for desktop mounts a drive letter, G: by default.
-    foreach ($d in [char[]]('D'..'Z')) {
+    #
+    # Walk the character CODES, not a character range. `'D'..'Z'` needs PowerShell 7:
+    # Windows PowerShell 5.1's range operator takes integers only and fails with
+    # "Cannot convert value D to type System.Int32". 5.1 is what `powershell -File`
+    # runs on a standard Windows machine, so everything in this file has to work there.
+    foreach ($code in ([int][char]'D')..([int][char]'Z')) {
+        $d = [char]$code
         $p = "${d}:\My Drive"
         if (Test-Path $p) { $roots += $p }
     }

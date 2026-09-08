@@ -1,6 +1,6 @@
 {
   "manifestVersion": 2,
-  "packageVersion": "1.2.0",
+  "packageVersion": "1.2.1",
   "guideNote": "Meta/Vault Guide.md carries guide_version in its frontmatter. On a re-run the installer replaces an installed guide whose version is lower than the shipped one, keeping the old file beside it. A guide with no guide_version is hand-written or predates versioning and is never touched without --replace-guide. Every vault also carries Meta/.brain.json recording the package and guide versions it is on.",
   "vaultNamePattern": "<email local part>-brain, lowercased with full stops removed, e.g. a.chen@ -> achen-brain",
   "comment": "Single source of truth for the vault's shape. Both installers read this rather than hard-coding folder names. Adding a folder here adds it to every new vault.",

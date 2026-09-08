@@ -266,6 +266,44 @@ else
   pass "the Vault Guide functions use -LiteralPath throughout"
 fi
 
+head_ "Windows code runs on Windows PowerShell 5.1"
+# `powershell -File` on a standard Windows machine is Windows PowerShell 5.1, not
+# pwsh 7. Constructs that only exist in 7 parse fine everywhere and then fail at run
+# time on the machines this actually ships to, which is the worst possible shape for a
+# bug. A character range cost a colleague a failed install: `'D'..'Z'` needs 7, and
+# 5.1 throws "Cannot convert value D to type System.Int32".
+ps_files="Windows/install.ps1 $(ls Windows/lib/*.ps1 2>/dev/null | tr '\n' ' ')"
+ps_bad=0
+check_ps() { # check_ps "description" "egrep pattern"
+  # Full-line comments are dropped, or the comment explaining this rule trips it.
+  hits="$(grep -rnE "$2" $ps_files 2>/dev/null | grep -vE ':[0-9]+:[[:space:]]*#' || true)"
+  if [ -n "$hits" ]; then
+    bad "PowerShell 7-only: $1"
+    printf '%s\n' "$hits" | sed 's/^/         /'
+    ps_bad=$((ps_bad+1))
+  fi
+}
+check_ps "character range in .. (use integer char codes)" "'[A-Za-z]'\.\.'[A-Za-z]'"
+check_ps "null-coalescing ?? or ??="                      "\?\?"
+check_ps "null-conditional ?. or ?["                      "\\\$[A-Za-z_][A-Za-z0-9_]*\?[.[]"
+check_ps "ForEach-Object -Parallel"                       "\-Parallel([^A-Za-z]|$)"
+check_ps "ConvertFrom-Json -AsHashtable"                  "\-AsHashtable"
+check_ps "Get-Content -AsByteStream"                      "\-AsByteStream"
+check_ps "Split-Path -LeafBase"                           "\-LeafBase"
+check_ps "\$PSStyle"                                      "\\\$PSStyle"
+check_ps "Join-String"                                    "Join-String"
+[ "$ps_bad" = "0" ] && pass "no PowerShell 7-only constructs in the Windows files"
+
+# Invoke-WebRequest without -UseBasicParsing uses the Internet Explorer engine on 5.1
+# and fails outright where IE first-run has never been completed.
+iwr="$(grep -rn 'Invoke-WebRequest' $ps_files 2>/dev/null | grep -v 'UseBasicParsing' || true)"
+if [ -n "$iwr" ]; then
+  bad "Invoke-WebRequest without -UseBasicParsing (needs the IE engine on 5.1)"
+  printf '%s\n' "$iwr" | sed 's/^/         /'
+else
+  pass "every Invoke-WebRequest passes -UseBasicParsing"
+fi
+
 head_ "The public site and the installers agree"
 # The repo is public and the site is built from it, so two things are checked here:
 # that no working notes are tracked, and that the filenames the installers fetch are
