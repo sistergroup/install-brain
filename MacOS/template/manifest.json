@@ -1,0 +1,96 @@
+{
+  "manifestVersion": 2,
+  "packageVersion": "1.2.0",
+  "guideNote": "Meta/Vault Guide.md carries guide_version in its frontmatter. On a re-run the installer replaces an installed guide whose version is lower than the shipped one, keeping the old file beside it. A guide with no guide_version is hand-written or predates versioning and is never touched without --replace-guide. Every vault also carries Meta/.brain.json recording the package and guide versions it is on.",
+  "vaultNamePattern": "<email local part>-brain, lowercased with full stops removed, e.g. a.chen@ -> achen-brain",
+  "comment": "Single source of truth for the vault's shape. Both installers read this rather than hard-coding folder names. Adding a folder here adds it to every new vault.",
+  "folders": [
+    "Archive",
+    "Areas",
+    "Companies",
+    "Ideas",
+    "Ideas/MOCs",
+    "Inbox",
+    "Journal",
+    "Journal/Sessions",
+    "Journal/Weekly",
+    "Journal/Monthly",
+    "Me",
+    "Meta",
+    "Meta/Attachments",
+    "Meta/Setup",
+    "Meta/Templates",
+    "People",
+    "Projects",
+    "Resources"
+  ],
+  "roles": {
+    "comment": "What the person mainly produces. NOT asked at install time: the installer copies every set into <vault>/Meta/.roles/ with tokens already substituted, and /brain-setup infers which one fits from the mailbox, calendar and Teams, confirms it with the person, then creates the folders in roles/<key>/folders.txt and copies roles/<key>/files/ into place. A role only ever ADDS, so nobody's vault is missing a place to put something. All five stay staged after one is applied, so another can be applied later without reinstalling.",
+    "keys": [
+      "documents",
+      "assets",
+      "reporting",
+      "creative",
+      "enabling"
+    ]
+  },
+  "tokens": [
+    {
+      "name": "OWNER_NAME",
+      "source": "prompt",
+      "prompt": "Your full name"
+    },
+    {
+      "name": "OWNER_EMAIL",
+      "source": "prompt",
+      "prompt": "Your work email address"
+    },
+    {
+      "name": "COMPANY_NAME",
+      "source": "prompt",
+      "prompt": "The company you work for"
+    },
+    {
+      "name": "VAULT_NAME",
+      "source": "computed",
+      "note": "Folder name: the local part of OWNER_EMAIL, lowercased with full stops removed, plus -brain"
+    },
+    {
+      "name": "VAULT_PATH",
+      "source": "computed",
+      "note": "Absolute path to the vault: the home folder plus VAULT_NAME"
+    },
+    {
+      "name": "SYNC_PROVIDER",
+      "source": "choice",
+      "options": [
+        "OneDrive",
+        "Google Drive",
+        "None"
+      ]
+    },
+    {
+      "name": "SYNC_LOCATION",
+      "source": "computed",
+      "note": "Where the real folder lives, or 'the vault folder itself' when there is no sync"
+    },
+    {
+      "name": "SETUP_DATE",
+      "source": "computed",
+      "note": "YYYY-MM-DD of the install"
+    }
+  ],
+  "skills": [
+    "brain-setup",
+    "vault-filing",
+    "vault-rollup",
+    "email-triage"
+  ],
+  "skillsNote": "Copied into <vault>/.claude/skills (read by Claude Code) AND zipped into <vault>/Meta/Setup for the employee to upload to their own claude.ai account, which is the only way the desktop app sees them. See docs/SKILLS-SETUP.md.",
+  "rootNotes": [
+    "START HERE.md",
+    "WELCOME.md",
+    "README.md",
+    "CLAUDE.md"
+  ]
+}

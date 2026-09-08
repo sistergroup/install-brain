@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Set up your context brain</title>
+<style>
+  :root {
+    --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --line: #e2ded7;
+    --card: #ffffff; --code-bg: #f4f2ee; --accent: #7a5c3e; --accent-fg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16150f; --fg: #ece9e2; --muted: #9c968a; --line: #2f2c24;
+      --card: #1e1c15; --code-bg: #22201a; --accent: #c8a37a; --accent-fg: #1c1b19;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 40rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .5rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .75rem; letter-spacing: -.005em; }
+  p { margin: 0 0 1rem; }
+  .lede { color: var(--muted); margin-bottom: 2.5rem; }
+  .q { font-size: 1.15rem; font-weight: 600; margin: 0 0 1rem; }
+  .pick { display: flex; gap: .75rem; flex-wrap: wrap; }
+  .pick button {
+    flex: 1 1 12rem; padding: 1.1rem 1rem; font: inherit; font-weight: 600;
+    background: var(--card); color: var(--fg); border: 1px solid var(--line);
+    border-radius: .6rem; cursor: pointer; text-align: left;
+  }
+  .pick button:hover { border-color: var(--accent); }
+  .pick button span { display: block; font-weight: 400; color: var(--muted); font-size: .9rem; margin-top: .15rem; }
+  ol { padding-left: 1.4rem; margin: 0; }
+  ol > li { margin-bottom: 1.75rem; }
+  ol > li > strong { display: block; margin-bottom: .35rem; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: .5rem;
+    padding: .85rem 1rem; overflow-x: auto; margin: .6rem 0;
+    font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+  p code { background: var(--code-bg); padding: .1em .35em; border-radius: .25rem; }
+  .dl {
+    display: inline-block; padding: .6rem 1.1rem; background: var(--accent); color: var(--accent-fg);
+    text-decoration: none; border-radius: .45rem; font-weight: 600; font-size: .95rem;
+  }
+  .copy {
+    float: right; font: inherit; font-size: .8rem; padding: .2rem .55rem; margin: .1rem 0 0 .5rem;
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: .3rem; cursor: pointer;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--accent); }
+  .note { color: var(--muted); font-size: .92rem; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
+  details { border: 1px solid var(--line); border-radius: .5rem; padding: .8rem 1rem; background: var(--card); margin-bottom: .6rem; }
+  details summary { cursor: pointer; font-weight: 600; }
+  details > *:not(summary) { margin-top: .8rem; }
+  .switch { background: none; border: 0; color: var(--muted); font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+
+  <h1>Set up your context brain</h1>
+  <p class="lede">A folder of notes on your own computer that Claude reads and writes, so it
+  understands your role, your colleagues and what you are working on without being told each
+  time. This page installs it. About ten minutes, and no administrator rights.</p>
+
+  <section id="pick">
+    <p class="q">Are you on a Mac or a Windows computer?</p>
+    <div class="pick">
+      <button onclick="choose('mac')">Mac<span>macOS</span></button>
+      <button onclick="choose('win')">Windows<span>Windows 10 or 11</span></button>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── macOS ───────────────────────── -->
+  <section id="mac" hidden>
+    <p class="note">Installing on <strong>Mac</strong>. <button class="switch" onclick="choose('win')">On Windows instead?</button></p>
+
+    <h2>Three steps</h2>
+    <ol>
+      <li>
+        <strong>Open Terminal.</strong>
+        Press <code>&#8984;</code> and the space bar together, type <code>Terminal</code>, press Enter.
+        A window with a text prompt opens. Everything below gets pasted in there.
+      </li>
+      <li>
+        <strong>Paste this, all four lines at once, then press Enter.</strong>
+        <pre><button class="copy" onclick="copy(this)">Copy</button><code>cd ~/Downloads
+curl -fLO https://sistergroup.github.io/install-brain/brain-macos.tar.gz
+mkdir -p brain-installer &amp;&amp; tar -xzf brain-macos.tar.gz -C brain-installer
+cd brain-installer &amp;&amp; ./install.sh</code></pre>
+        <p class="note">This downloads the installer to your Downloads folder, unpacks it and
+        runs it. Nothing is hidden: you can open that folder and read every file before or after.</p>
+      </li>
+      <li>
+        <strong>Answer four questions.</strong>
+        Your name, your work email, your company, and where the folder should live. The
+        recommended answer is offered for the last one, so pressing Enter is fine.
+      </li>
+    </ol>
+
+    <p>When it finishes it prints the remaining steps, which all happen inside the Claude app.
+    The same instructions are saved in your new folder as <code>START HERE.md</code>.</p>
+
+    <h2>If you would rather look first</h2>
+    <p>Run it with <code>--dry-run</code> and it reports every decision it would make and
+    changes nothing:</p>
+    <pre><button class="copy" onclick="copy(this)">Copy</button><code>cd ~/Downloads/brain-installer &amp;&amp; ./install.sh --dry-run</code></pre>
+    <p class="note">Or <a class="dl" href="brain-macos.tar.gz" download>Download the installer</a>
+    and unpack it by double-clicking, if you prefer not to use commands to fetch it. You will
+    still need Terminal for the last line.</p>
+
+    <h2>If something goes wrong</h2>
+    <details>
+      <summary>It says <code>permission denied</code></summary>
+      <p>The execute permission did not survive the download. Fix it and run again:</p>
+      <pre><button class="copy" onclick="copy(this)">Copy</button><code>chmod +x install.sh &amp;&amp; ./install.sh</code></pre>
+    </details>
+    <details>
+      <summary>It says it could not download something</summary>
+      <p>Your network is probably blocking it. The installer needs to reach
+      <code>sistergroup.github.io</code> to fetch itself, and <code>obsidian.md</code> and
+      <code>claude.ai</code> to install the two apps. Try again off the company VPN, or ask
+      whoever set this up.</p>
+    </details>
+    <details>
+      <summary>It already found a brain on my machine</summary>
+      <p>Then it offers to use that one and add only what is missing. Nothing you have already
+      written is changed or overwritten, and saying yes is safe.</p>
+    </details>
+    <details>
+      <summary>I want to run it again</summary>
+      <p>Safe. Every step checks first and skips what is already there. Notes, skills and your
+      Obsidian settings are never overwritten.</p>
+    </details>
+  </section>
+
+  <!-- ──────────────────────── Windows ──────────────────────── -->
+  <section id="win" hidden>
+    <p class="note">Installing on <strong>Windows</strong>. <button class="switch" onclick="choose('mac')">On a Mac instead?</button></p>
+
+    <h2>Three steps</h2>
+    <ol>
+      <li>
+        <strong>Open PowerShell.</strong>
+        Press the Windows key, type <code>PowerShell</code>, press Enter. A window with a text
+        prompt opens. Everything below gets pasted in there. You do not need to run it as
+        administrator.
+      </li>
+      <li>
+        <strong>Paste this, all five lines at once, then press Enter.</strong>
+        <pre><button class="copy" onclick="copy(this)">Copy</button><code>cd ~\Downloads
+Invoke-WebRequest -Uri https://sistergroup.github.io/install-brain/brain-windows.zip -OutFile brain-windows.zip
+Expand-Archive .\brain-windows.zip -DestinationPath .\brain-installer -Force
+Get-ChildItem .\brain-installer -Recurse | Unblock-File
+powershell -ExecutionPolicy Bypass -File .\brain-installer\install.ps1</code></pre>
+        <p class="note">The fourth line clears the downloaded-from-the-internet flag that
+        Windows puts on new files, which otherwise stops the installer loading part of itself.
+        The fifth allows this one script to run without changing any setting on your machine.</p>
+      </li>
+      <li>
+        <strong>Answer four questions.</strong>
+        Your name, your work email, your company, and where the folder should live. The
+        recommended answer is offered for the last one, so pressing Enter is fine.
+      </li>
+    </ol>
+
+    <p>When it finishes it prints the remaining steps, which all happen inside the Claude app.
+    The same instructions are saved in your new folder as <code>START HERE.md</code>.</p>
+
+    <h2>If you would rather look first</h2>
+    <p>Add <code>-DryRun</code> and it reports every decision it would make and changes nothing:</p>
+    <pre><button class="copy" onclick="copy(this)">Copy</button><code>powershell -ExecutionPolicy Bypass -File .\brain-installer\install.ps1 -DryRun</code></pre>
+    <p class="note">Or <a class="dl" href="brain-windows.zip" download>Download the installer</a>
+    and extract it with right-click, Extract All, if you prefer not to use commands to fetch it.
+    Do still run the <code>Unblock-File</code> line afterwards.</p>
+
+    <h2>If something goes wrong</h2>
+    <details>
+      <summary>It says running scripts is disabled on this system</summary>
+      <p>The <code>-ExecutionPolicy Bypass</code> part of the last line is what avoids that, so
+      check it was included. It applies to that one command only and changes nothing permanently.</p>
+    </details>
+    <details>
+      <summary>It cannot find part of itself, or a <code>lib</code> file fails to load</summary>
+      <p>The <code>Unblock-File</code> line was skipped or did not cover everything. Run it again
+      and then re-run the installer.</p>
+    </details>
+    <details>
+      <summary>Obsidian wants administrator rights</summary>
+      <p>Let it fail. The installer carries on without it and tells you at the end. Everything
+      else still works, and Obsidian can be installed separately later. It is only there to give
+      you a nicer way to read your notes.</p>
+    </details>
+    <details>
+      <summary>I want to run it again</summary>
+      <p>Safe. Every step checks first and skips what is already there. Notes, skills and your
+      Obsidian settings are never overwritten.</p>
+    </details>
+  </section>
+
+  <hr>
+  <p class="note">The installer creates a folder of ordinary markdown files in your own storage.
+  It reads nothing and sends nothing anywhere. The part that fills the folder in runs later,
+  inside the Claude app, and asks your permission for each source before it reads anything.</p>
+
+</main>
+
+<script>
+  function choose(which) {
+    document.getElementById('pick').hidden = true;
+    document.getElementById('mac').hidden = which !== 'mac';
+    document.getElementById('win').hidden = which !== 'win';
+    try { localStorage.setItem('brain-os', which); } catch (e) {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function copy(btn) {
+    var code = btn.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.innerText).then(function () {
+      var was = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = was; }, 1400);
+    }).catch(function () { btn.textContent = 'Select and copy'; });
+  }
+  try {
+    var saved = localStorage.getItem('brain-os');
+    if (saved === 'mac' || saved === 'win') { choose(saved); }
+  } catch (e) {}
+</script>
+</body>
+</html>

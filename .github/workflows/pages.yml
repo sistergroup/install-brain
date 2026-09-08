@@ -1,0 +1,132 @@
+# Builds the two installer archives and publishes them, with the install guide, to
+# GitHub Pages. A push that touches either platform folder or the site republishes.
+#
+# The repo is public, so the only thing standing between a stray internal file and a
+# public website is that dist/ is assembled from scratch and its contents are checked
+# against an explicit list. Never deploy the repo root.
+name: Publish the installer site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'MacOS/**'
+      - 'Windows/**'
+      - 'site/**'
+      - 'check.sh'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time, newest wins.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # check.sh runs BEFORE dist/ exists, and that order is not incidental: it fails
+      # the run if a dist/ folder or a stray zip is present, because the platform
+      # folders are the source and the archives are built. It also diffs template/ and
+      # skills/ across the two platforms, so drift fails the build rather than shipping.
+      - name: Verify the package
+        run: bash check.sh
+
+      - name: Read the package version
+        id: v
+        run: |
+          v=$(awk -F'"' '/"packageVersion"/ { print $4; exit }' MacOS/template/manifest.json)
+          [ -n "$v" ] || { echo "::error::no packageVersion in MacOS/template/manifest.json"; exit 1; }
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "publishing $v"
+
+      - name: Build the site
+        env:
+          V: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          mkdir -p "dist/v$V"
+
+          # macOS: resolve_payload pipes the download straight into tar and looks for
+          # template/ at a maximum depth of 2, so the archive must have no wrapper
+          # folder. -C MacOS . puts template/ at depth 1.
+          tar -czf dist/brain-macos.tar.gz -C MacOS .
+
+          # Windows: Expand-Archive recurses to any depth, but keep the same shape.
+          ( cd Windows && zip -qr ../dist/brain-windows.zip . )
+
+          # The standalone entry points, from the same tree that produced the archives.
+          # A piped run fetches install.sh from here and its lib/ files from the archive,
+          # so these must never be published from different builds.
+          cp MacOS/install.sh    dist/install.sh
+          cp Windows/install.ps1 dist/install.ps1
+
+          cp site/index.html dist/index.html
+          cp site/robots.txt dist/robots.txt
+          touch dist/.nojekyll
+
+          # The same five, pinned, so a version can be cited and re-fetched.
+          cp dist/brain-macos.tar.gz dist/brain-windows.zip \
+             dist/install.sh dist/install.ps1 dist/index.html "dist/v$V/"
+
+      - name: Nothing unexpected in what gets published
+        env:
+          V: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          ( cd dist && find . -type f | sed 's|^\./||' | sort ) > /tmp/actual
+          cat > /tmp/expected <<EOF
+          .nojekyll
+          brain-macos.tar.gz
+          brain-windows.zip
+          index.html
+          install.ps1
+          install.sh
+          robots.txt
+          v$V/brain-macos.tar.gz
+          v$V/brain-windows.zip
+          v$V/index.html
+          v$V/install.ps1
+          v$V/install.sh
+          EOF
+          sed -i 's/^ *//' /tmp/expected
+          sort -o /tmp/expected /tmp/expected
+          if ! diff -u /tmp/expected /tmp/actual; then
+            echo "::error::dist/ does not match the published file list. Nothing is deployed."
+            exit 1
+          fi
+          echo "dist/ matches the expected file list"
+
+          # The archives are built from the platform folders, which never contain the
+          # working notes. Checked anyway, because this is the file that would leak them.
+          if tar -tzf dist/brain-macos.tar.gz | grep -qE '(^|/)(docs|brainstorms|sessions)/'; then
+            echo "::error::brain-macos.tar.gz contains working notes"; exit 1
+          fi
+          if unzip -Z1 dist/brain-windows.zip | grep -qE '(^|/)(docs|brainstorms|sessions)/'; then
+            echo "::error::brain-windows.zip contains working notes"; exit 1
+          fi
+          echo "archives carry no working notes"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

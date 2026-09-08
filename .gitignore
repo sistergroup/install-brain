@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Build output. The two platform folders are the source; the site and the archives
+# are built by .github/workflows/pages.yml in CI. check.sh fails if either is left
+# lying around in the working tree.
+dist/
+*.zip
+
+# Install logs, if one is ever produced in here
+*.log
+
+# Working notes. This repo is PUBLIC. Planning documents, review notes and session
+# logs name real people, the organisation, and things like plan tiers and policy
+# status. They belong in a context brain, not here.
+docs/brainstorms/
+docs/sessions/
+
+# The deny list check.sh uses is itself a list of real names, so it stays local.
+.brand-deny
